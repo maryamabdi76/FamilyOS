@@ -20,6 +20,7 @@ export interface ClassifyDocumentInput {
 export interface ClassifyDocumentResult {
   documentType: DocumentType;
   confidence: number;
+  usage?: TokenUsage;
 }
 
 export interface ExtractDocumentInput {
@@ -33,6 +34,11 @@ export interface ExtractDocumentInput {
  */
 export type ExtractDocumentResult = Record<string, unknown>;
 
+export interface ExtractDocumentOutput {
+  raw: ExtractDocumentResult;
+  usage?: TokenUsage;
+}
+
 export interface AnswerQuestionInput {
   question: string;
   /** Pre-retrieved context relevant to the question — never the whole DB (spec §16). */
@@ -44,9 +50,26 @@ export interface AnswerQuestionResult {
   sourceIds: string[];
 }
 
+export interface TokenUsage {
+  inputTokens?: number;
+  outputTokens?: number;
+  model: string;
+}
+
+export interface ExtractTextInput {
+  mimeType: string;
+  data: Buffer;
+}
+
+export interface ExtractTextResult {
+  text: string;
+  usage?: TokenUsage;
+}
+
 export interface AIService {
+  extractTextFromDocument(input: ExtractTextInput): Promise<ExtractTextResult>;
   classifyDocument(input: ClassifyDocumentInput): Promise<ClassifyDocumentResult>;
-  extractDocument(input: ExtractDocumentInput): Promise<ExtractDocumentResult>;
+  extractDocument(input: ExtractDocumentInput): Promise<ExtractDocumentOutput>;
   answerQuestion(input: AnswerQuestionInput): Promise<AnswerQuestionResult>;
   generateEmbedding(text: string): Promise<number[]>;
 }

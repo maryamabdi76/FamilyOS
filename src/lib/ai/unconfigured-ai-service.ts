@@ -2,18 +2,17 @@ import "server-only";
 import type { AIService } from "./types";
 
 /**
- * Placeholder AIService. No LLM/OCR provider has been chosen yet (see
- * Phase 0 open decisions). This throws instead of returning fabricated
- * data, per Rule 12 (no mock data in production paths) — swap this
- * export for a real provider implementation in Phase 3.
+ * Placeholder AIService used when no provider API key is configured.
+ * Throws instead of returning fabricated data (Rule 12).
  */
 function notConfigured(): never {
   throw new Error(
-    "No AI provider is configured yet. Implement AIService against a chosen provider before Phase 3.",
+    "No AI provider is configured. Set OPENAI_API_KEY in .env.local for Phase 3 processing.",
   );
 }
 
 export const unconfiguredAIService: AIService = {
+  extractTextFromDocument: async () => notConfigured(),
   classifyDocument: async () => notConfigured(),
   extractDocument: async () => notConfigured(),
   answerQuestion: async () => notConfigured(),

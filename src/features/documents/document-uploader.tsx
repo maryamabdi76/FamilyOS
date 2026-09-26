@@ -36,6 +36,10 @@ export function DocumentUploader() {
       setProgress(100);
       setFile(null); setTitle(""); setContent("");
       if (inputRef.current) inputRef.current.value = "";
+      if (typeof result.id === "string") {
+        router.push(`/dashboard/documents/${result.id}`);
+        return;
+      }
       router.refresh();
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : "ذخیره انجام نشد");

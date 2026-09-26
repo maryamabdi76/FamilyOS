@@ -11,6 +11,7 @@ function toListItem(row: typeof documents.$inferSelect): DocumentListItem {
     mimeType: row.mimeType,
     fileSizeBytes: row.fileSizeBytes,
     status: row.status,
+    documentType: row.documentType,
     createdAt: row.createdAt.toISOString(),
   };
 }
@@ -28,6 +29,7 @@ export async function getDocumentForHousehold(documentId: string, householdId: s
     householdId: row.householdId,
     storageKey: row.storageKey,
     extractedText: row.extractedText,
+    extractedMetadata: row.extractedMetadata,
     processingError: row.processingError,
   };
 }

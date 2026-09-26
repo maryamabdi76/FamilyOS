@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { getAuthenticatedUser } from "@/lib/supabase/server";
 import { db } from "@/lib/db/client";
@@ -9,6 +9,8 @@ import { listDocuments } from "@/features/documents/queries";
 import { documentUploadSchema, textDocumentSchema } from "@/features/documents/schemas";
 import { ALLOWED_DOCUMENT_TYPES, MAX_DOCUMENT_SIZE_BYTES, isAllowedDocumentType } from "@/features/documents/types";
 import { supabaseStorageService } from "@/lib/storage/supabase-storage";
+import { enqueueDocumentProcessing } from "@/features/documents/processing/enqueue";
+import { processPendingJobForDocument } from "@/features/documents/processing/worker";
 
 export const runtime = "nodejs";
 
@@ -67,6 +69,12 @@ export async function POST(request: NextRequest) {
       extractedText: mimeType === "text/plain" ? data.toString("utf8") : null,
     }).returning({ id: documents.id });
     if (!document) return NextResponse.json({ error: "سند ذخیره نشد" }, { status: 500 });
+
+    await enqueueDocumentProcessing({ documentId: document.id, householdId: household.id });
+    after(() => {
+      void processPendingJobForDocument(document.id);
+    });
+
     return NextResponse.json({ id: document.id }, { status: 201 });
   } catch (error) {
     try { await supabaseStorageService.delete(storageKey); } catch { /* preserve the original failure */ }
